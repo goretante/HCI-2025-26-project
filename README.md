@@ -1,12 +1,9 @@
 # HCI-2025-26-project
 
 - [Project Structure](#project-structure)
-- [My Project Links](#my-project-links)
+- [Project Links](#my-project-links)
   - [Semester Project](#semester-project)
   - [Semester Assignments](#semester-assignments)
-- [Project Requirements](#project-requirements)
-  - [Web Application Requirements](#web-application-requirements)
-  - [Project Demonstration](#project-demonstration)
 
 ## Project Structure
 
@@ -14,7 +11,7 @@
 - **`/assignments`**: Results of assignments
 - **`/docs`**: Documentation
 
-## My Project Links
+## Project Links
 
 ### Semester Project
 
