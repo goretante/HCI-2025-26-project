@@ -11,3 +11,5 @@ GoalTrack offers and intuitive web application that allows users to define and t
 
 ## How we came up with the idea?
 The idea arose from personal experiences and discussions with peers who often forget their daily tasks and goals and feel the need for a simple tool that would help them stay organized and focused.
+
+## Project demo
