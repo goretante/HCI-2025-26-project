@@ -13,4 +13,4 @@ GoalTrack offers and intuitive web application that allows users to define and t
 The idea arose from personal experiences and discussions with peers who often forget their daily tasks and goals and feel the need for a simple tool that would help them stay organized and focused.
 
 ## Project demo
-[Link to demo (download)](https://github.com/goretante/HCI-2025-26-project/blob/main/assignments/demo.mp4)
+[Link to demo (download)](https://github.com/goretante/HCI-2025-26-project/blob/main/assignments/1st%20assignment/video_pitch.mp4)
