@@ -9,5 +9,5 @@
 | Organized, ambitious, tech-savvy         | Curious, goal-oriented, prefers simplicity | Creative, multitasker, pragmatic         |
 | Uses app mostly on smartphone; wants simplicity | Uses app on mobile/laptop; likes gamification and progress visuals | Uses smartphone/tablet; values easy tracking |
 
-### Sitemap.
+### Sitemap
 ![sitemap](sitemap.png)
