@@ -9,17 +9,5 @@
 | Organized, ambitious, tech-savvy         | Curious, goal-oriented, prefers simplicity | Creative, multitasker, pragmatic         |
 | Uses app mostly on smartphone; wants simplicity | Uses app on mobile/laptop; likes gamification and progress visuals | Uses smartphone/tablet; values easy tracking |
 
-## Information Architecture
-
-### Card sorting
-| Card Item                | Group / Category       |
-|--------------------------|-----------------------|
-| Homepage                 | General               |
-| Personal Goals           | Dashboard             |
-| Habit Tracking           | Dashboard             |
-| Progress Reports         | Dashboard             |
-| Blog                     | Blog                  |
-| Login / Register         | Account               |
-
 ### Sitemap
 ![sitemap](sitemap.png)
