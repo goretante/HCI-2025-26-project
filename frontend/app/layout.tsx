@@ -3,8 +3,7 @@ import Navbar from "../components/Navbar";
 import { ReactNode } from "react";
 
 export const metadata = {
-  title: "Goal & Habit Tracker",
-  description: "Simple navigation prototype based on sitemap",
+  title: "Goal Track",
 };
 
 export default function RootLayout({ children }: { children: ReactNode }) {
