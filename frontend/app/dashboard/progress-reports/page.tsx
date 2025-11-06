@@ -1,5 +1,4 @@
 import PageWrapper from "../../../components/PageWrapper";
-import Link from "next/link";
 
 export default function ProgressReportsPage() {
   return (
