@@ -15,7 +15,7 @@
 
 ### Semester Project
 
-- Link to production version: [**Production Version**](URL_TO_PRODUCTION_VERSION) <!-- Replace with actual URL -->
+- Link to production version: [**Production Version**](https://hci-2025-26-project.vercel.app/) <!-- Replace with actual URL -->
 - Link to final report: [**Final Report**](URL_TO_FINAL_REPORT) <!-- Replace with actual URL -->
 <!-- Add more as necessary -->
 
