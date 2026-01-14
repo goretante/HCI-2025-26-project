@@ -123,7 +123,7 @@ export const habitLogsRelations = relations(habitLogs, ({ one }) => ({
 }))
 
 // ============================================
-// TYPES (inferred from schema)
+// TYPES (snake_case to match database)
 // ============================================
 export type Profile = typeof profiles.$inferSelect
 export type NewProfile = typeof profiles.$inferInsert
@@ -189,6 +189,3 @@ export interface GoalProgress {
 }
 
 export type NewGoalProgress = typeof goalProgress.$inferInsert
-
-export type BlogPost = typeof blogPosts.$inferSelect
-export type NewBlogPost = typeof blogPosts.$inferInsert

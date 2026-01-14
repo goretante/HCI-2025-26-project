@@ -1,17 +1,79 @@
-import { db, goals, habits, habitLogs, goalProgress, blogPosts } from '@/db'
-import { eq, and, desc, gte, lte, sql } from 'drizzle-orm'
-import type { Goal, Habit, HabitLog, GoalProgress, NewGoal, NewHabit, BlogPost } from '@/db/schema'
+import { db } from './index'
+import { goals, habits, habitLogs, goalProgress } from './schema'
+import { eq, and, gte, lte, desc, sql } from 'drizzle-orm'
+import type { Goal, Habit, HabitLog, GoalProgress, NewGoal, NewHabit } from './schema'
 
-// ============================================
-// GOALS
-// ============================================
+// Helper functions to convert between camelCase and snake_case
+function mapGoalToSnakeCase(goal: any): Goal {
+  return {
+    id: goal.id,
+    user_id: goal.userId,
+    title: goal.title,
+    description: goal.description,
+    category: goal.category,
+    target_value: goal.targetValue,
+    current_value: goal.currentValue,
+    unit: goal.unit,
+    start_date: goal.startDate,
+    end_date: goal.endDate,
+    status: goal.status,
+    priority: goal.priority,
+    color: goal.color,
+    created_at: goal.createdAt,
+    updated_at: goal.updatedAt,
+  }
+}
+
+function mapHabitToSnakeCase(habit: any): Habit {
+  return {
+    id: habit.id,
+    user_id: habit.userId,
+    title: habit.title,
+    description: habit.description,
+    icon: habit.icon,
+    color: habit.color,
+    frequency: habit.frequency,
+    target_days: habit.targetDays,
+    reminder_time: habit.reminderTime,
+    streak_current: habit.streakCurrent,
+    streak_best: habit.streakBest,
+    is_active: habit.isActive,
+    created_at: habit.createdAt,
+    updated_at: habit.updatedAt,
+  }
+}
+
+function mapHabitLogToSnakeCase(log: any): HabitLog {
+  return {
+    id: log.id,
+    habit_id: log.habitId,
+    user_id: log.userId,
+    completed_at: log.completedAt,
+    notes: log.notes,
+    created_at: log.createdAt,
+  }
+}
+
+function mapGoalProgressToSnakeCase(progress: any): GoalProgress {
+  return {
+    id: progress.id,
+    goal_id: progress.goalId,
+    user_id: progress.userId,
+    value: progress.value,
+    notes: progress.notes,
+    logged_at: progress.loggedAt,
+    created_at: progress.createdAt,
+  }
+}
 
 export async function getGoals(user_id: string): Promise<Goal[]> {
-  return await db
+  const results = await db
     .select()
     .from(goals)
     .where(eq(goals.userId, user_id))
-    .orderBy(desc(goals.createdAt))
+    .orderBy(goals.createdAt)
+  
+  return results.map(mapGoalToSnakeCase)
 }
 
 export async function getGoal(id: string, user_id: string): Promise<Goal | undefined> {
@@ -21,52 +83,66 @@ export async function getGoal(id: string, user_id: string): Promise<Goal | undef
     .where(and(eq(goals.id, id), eq(goals.userId, user_id)))
     .limit(1)
   
-  return result[0]
+  return result[0] ? mapGoalToSnakeCase(result[0]) : undefined
 }
 
 export async function getActiveGoals(user_id: string): Promise<Goal[]> {
-  return await db
+  const results = await db
     .select()
     .from(goals)
     .where(and(eq(goals.userId, user_id), eq(goals.status, 'active')))
-    .orderBy(desc(goals.createdAt))
+    .orderBy(goals.createdAt)
+  
+  return results.map(mapGoalToSnakeCase)
 }
 
 export async function createGoal(user_id: string, data: Omit<NewGoal, 'userId' | 'id'>): Promise<Goal> {
   const result = await db
     .insert(goals)
-    .values({ ...data, userId: user_id })
+    .values({
+      userId: user_id,
+      ...data,
+    })
     .returning()
   
-  return result[0]
+  return mapGoalToSnakeCase(result[0])
 }
 
 export async function updateGoal(id: string, user_id: string, data: Partial<Goal>): Promise<Goal> {
+  // Convert snake_case input to camelCase for database
+  const updateData: any = {}
+  if (data.title !== undefined) updateData.title = data.title
+  if (data.description !== undefined) updateData.description = data.description
+  if (data.category !== undefined) updateData.category = data.category
+  if (data.target_value !== undefined) updateData.targetValue = data.target_value
+  if (data.current_value !== undefined) updateData.currentValue = data.current_value
+  if (data.unit !== undefined) updateData.unit = data.unit
+  if (data.end_date !== undefined) updateData.endDate = data.end_date
+  if (data.status !== undefined) updateData.status = data.status
+  if (data.priority !== undefined) updateData.priority = data.priority
+  if (data.color !== undefined) updateData.color = data.color
+
   const result = await db
     .update(goals)
-    .set({ ...data, updatedAt: new Date() })
+    .set({ ...updateData, updatedAt: new Date() })
     .where(and(eq(goals.id, id), eq(goals.userId, user_id)))
     .returning()
   
-  return result[0]
+  return mapGoalToSnakeCase(result[0])
 }
 
 export async function deleteGoal(id: string, user_id: string): Promise<void> {
-  await db
-    .delete(goals)
-    .where(and(eq(goals.id, id), eq(goals.userId, user_id)))
+  await db.delete(goals).where(and(eq(goals.id, id), eq(goals.userId, user_id)))
 }
 
-// ============================================
-// GOAL PROGRESS
-// ============================================
-
 export async function getGoalProgress(goal_id: string): Promise<GoalProgress[]> {
-  return await db
+  const results = await db
     .select()
     .from(goalProgress)
     .where(eq(goalProgress.goalId, goal_id))
     .orderBy(desc(goalProgress.loggedAt))
+  
+  return results.map(mapGoalProgressToSnakeCase)
 }
 
 export async function addGoalProgress(
@@ -77,74 +153,41 @@ export async function addGoalProgress(
 ): Promise<GoalProgress> {
   const result = await db
     .insert(goalProgress)
-    .values({ goalId: goal_id, userId: user_id, value, notes })
+    .values({
+      goalId: goal_id,
+      userId: user_id,
+      value,
+      notes,
+      loggedAt: new Date().toISOString().split('T')[0],
+    })
     .returning()
 
-  // Update goal current value
-  const progress = await db
-    .select({ total: sql<number>`COALESCE(SUM(${goalProgress.value}), 0)` })
-    .from(goalProgress)
-    .where(eq(goalProgress.goalId, goal_id))
-
-  // Ensure we don't go below 0
-  const total = Math.max(0, progress[0]?.total || 0)
-  
-  // Get goal to check if completed
-  const goal = await db
-    .select()
-    .from(goals)
+  // Update goal's current value
+  await db
+    .update(goals)
+    .set({ 
+      currentValue: sql`${goals.currentValue} + ${value}`,
+      updatedAt: new Date() 
+    })
     .where(eq(goals.id, goal_id))
-    .limit(1)
 
-  if (goal[0]) {
-    const new_status = total >= goal[0].targetValue ? 'completed' : 'active'
-    await db
-      .update(goals)
-      .set({ currentValue: total, status: new_status, updatedAt: new Date() })
-      .where(eq(goals.id, goal_id))
-  }
-
-  return result[0]
+  return mapGoalProgressToSnakeCase(result[0])
 }
 
 export async function deleteGoalProgress(id: string, user_id: string): Promise<void> {
-  // Get the progress entry first
-  const entry = await db
-    .select()
-    .from(goalProgress)
+  await db
+    .delete(goalProgress)
     .where(and(eq(goalProgress.id, id), eq(goalProgress.userId, user_id)))
-    .limit(1)
-
-  if (entry[0]) {
-    await db.delete(goalProgress).where(eq(goalProgress.id, id))
-
-    // Recalculate goal current value
-    const progress = await db
-      .select({ total: sql<number>`COALESCE(SUM(${goalProgress.value}), 0)` })
-      .from(goalProgress)
-      .where(eq(goalProgress.goalId, entry[0].goalId))
-
-    await db
-      .update(goals)
-      .set({ 
-        currentValue: progress[0]?.total || 0, 
-        status: 'active',
-        updatedAt: new Date() 
-      })
-      .where(eq(goals.id, entry[0].goalId))
-  }
 }
 
-// ============================================
-// HABITS
-// ============================================
-
 export async function getHabits(user_id: string): Promise<Habit[]> {
-  return await db
+  const results = await db
     .select()
     .from(habits)
-    .where(and(eq(habits.userId, user_id), eq(habits.isActive, true)))
-    .orderBy(desc(habits.createdAt))
+    .where(eq(habits.userId, user_id))
+    .orderBy(habits.createdAt)
+  
+  return results.map(mapHabitToSnakeCase)
 }
 
 export async function getHabit(id: string, user_id: string): Promise<Habit | undefined> {
@@ -154,41 +197,50 @@ export async function getHabit(id: string, user_id: string): Promise<Habit | und
     .where(and(eq(habits.id, id), eq(habits.userId, user_id)))
     .limit(1)
   
-  return result[0]
+  return result[0] ? mapHabitToSnakeCase(result[0]) : undefined
 }
 
 export async function createHabit(user_id: string, data: Omit<NewHabit, 'userId' | 'id'>): Promise<Habit> {
   const result = await db
     .insert(habits)
-    .values({ ...data, userId: user_id })
+    .values({
+      userId: user_id,
+      ...data,
+    })
     .returning()
   
-  return result[0]
+  return mapHabitToSnakeCase(result[0])
 }
 
 export async function updateHabit(id: string, user_id: string, data: Partial<Habit>): Promise<Habit> {
+  // Convert snake_case input to camelCase for database
+  const updateData: any = {}
+  if (data.title !== undefined) updateData.title = data.title
+  if (data.description !== undefined) updateData.description = data.description
+  if (data.icon !== undefined) updateData.icon = data.icon
+  if (data.color !== undefined) updateData.color = data.color
+  if (data.frequency !== undefined) updateData.frequency = data.frequency
+  if (data.target_days !== undefined) updateData.targetDays = data.target_days
+  if (data.reminder_time !== undefined) updateData.reminderTime = data.reminder_time
+  if (data.streak_current !== undefined) updateData.streakCurrent = data.streak_current
+  if (data.streak_best !== undefined) updateData.streakBest = data.streak_best
+  if (data.is_active !== undefined) updateData.isActive = data.is_active
+
   const result = await db
     .update(habits)
-    .set({ ...data, updatedAt: new Date() })
+    .set({ ...updateData, updatedAt: new Date() })
     .where(and(eq(habits.id, id), eq(habits.userId, user_id)))
     .returning()
   
-  return result[0]
+  return mapHabitToSnakeCase(result[0])
 }
 
 export async function deleteHabit(id: string, user_id: string): Promise<void> {
-  await db
-    .update(habits)
-    .set({ isActive: false, updatedAt: new Date() })
-    .where(and(eq(habits.id, id), eq(habits.userId, user_id)))
+  await db.delete(habits).where(and(eq(habits.id, id), eq(habits.userId, user_id)))
 }
 
-// ============================================
-// HABIT LOGS
-// ============================================
-
 export async function getHabitLogs(user_id: string, start_date: string, end_date: string): Promise<HabitLog[]> {
-  return await db
+  const results = await db
     .select()
     .from(habitLogs)
     .where(
@@ -198,14 +250,19 @@ export async function getHabitLogs(user_id: string, start_date: string, end_date
         lte(habitLogs.completedAt, end_date)
       )
     )
+    .orderBy(desc(habitLogs.completedAt))
+  
+  return results.map(mapHabitLogToSnakeCase)
 }
 
 export async function getTodayHabitLogs(user_id: string): Promise<HabitLog[]> {
   const today = new Date().toISOString().split('T')[0]
-  return await db
+  const results = await db
     .select()
     .from(habitLogs)
     .where(and(eq(habitLogs.userId, user_id), eq(habitLogs.completedAt, today)))
+  
+  return results.map(mapHabitLogToSnakeCase)
 }
 
 export async function toggleHabitLog(
@@ -213,230 +270,53 @@ export async function toggleHabitLog(
   habit_id: string, 
   date: string
 ): Promise<{ completed: boolean }> {
-  // Check if log exists
   const existing = await db
     .select()
     .from(habitLogs)
     .where(
       and(
-        eq(habitLogs.habitId, habit_id),
         eq(habitLogs.userId, user_id),
+        eq(habitLogs.habitId, habit_id),
         eq(habitLogs.completedAt, date)
       )
     )
     .limit(1)
 
-  if (existing[0]) {
-    // Delete (uncheck)
+  if (existing.length > 0) {
     await db.delete(habitLogs).where(eq(habitLogs.id, existing[0].id))
-    await updateHabitStreak(habit_id)
     return { completed: false }
   } else {
-    // Create (check)
-    await db.insert(habitLogs).values({ habitId: habit_id, userId: user_id, completedAt: date })
-    await updateHabitStreak(habit_id)
+    await db.insert(habitLogs).values({
+      habitId: habit_id,
+      userId: user_id,
+      completedAt: date,
+    })
     return { completed: true }
   }
 }
 
-async function updateHabitStreak(habit_id: string): Promise<void> {
-  const today = new Date()
-  let current_streak = 0
-  let check_date = new Date(today)
-
-  // Count consecutive days backwards
-  while (true) {
-    const date_str = check_date.toISOString().split('T')[0]
-    const log = await db
-      .select()
-      .from(habitLogs)
-      .where(and(eq(habitLogs.habitId, habit_id), eq(habitLogs.completedAt, date_str)))
-      .limit(1)
-
-    if (log[0]) {
-      current_streak++
-      check_date.setDate(check_date.getDate() - 1)
-    } else {
-      break
-    }
-  }
-
-  // Get current best streak
-  const habit = await db
-    .select()
-    .from(habits)
-    .where(eq(habits.id, habit_id))
-    .limit(1)
-
-  if (habit[0]) {
-    const best_streak = Math.max(habit[0].streakBest, current_streak)
-    await db
-      .update(habits)
-      .set({ streakCurrent: current_streak, streakBest: best_streak, updatedAt: new Date() })
-      .where(eq(habits.id, habit_id))
-  }
-}
-
-// ============================================
-// DASHBOARD STATS
-// ============================================
-
 export async function getDashboardStats(user_id: string) {
+  const allGoals = await getGoals(user_id)
+  const activeGoals = allGoals.filter((g) => g.status === 'active')
+  const completedGoals = allGoals.filter((g) => g.status === 'completed')
+
+  const allHabits = await getHabits(user_id)
+  const activeHabits = allHabits.filter((h) => h.is_active)
+
   const today = new Date().toISOString().split('T')[0]
-  const week_ago = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]
+  const todayLogs = await getTodayHabitLogs(user_id)
 
-  // Get goals counts
-  const all_goals = await db.select().from(goals).where(eq(goals.userId, user_id))
-  const total_goals = all_goals.length
-  const completed_goals = all_goals.filter(g => g.status === 'completed').length
-  const active_goals = all_goals.filter(g => g.status === 'active').length
-
-  // Get habits
-  const all_habits = await db
-    .select()
-    .from(habits)
-    .where(and(eq(habits.userId, user_id), eq(habits.isActive, true)))
-
-  // Get today's logs
-  const today_logs = await getTodayHabitLogs(user_id)
-
-  // Get week logs
-  const week_logs = await getHabitLogs(user_id, week_ago, today)
-
-  // Calculate streaks
-  const current_streak = Math.max(...all_habits.map(h => h.streakCurrent), 0)
-  const best_streak = Math.max(...all_habits.map(h => h.streakBest), 0)
-
-  // Weekly progress
-  const total_possible_week = all_habits.length * 7
-  const weekly_progress = total_possible_week > 0 
-    ? Math.round((week_logs.length / total_possible_week) * 100) 
-    : 0
+  const totalProgress = activeGoals.reduce((sum, goal) => {
+    const progress = (goal.current_value / goal.target_value) * 100
+    return sum + Math.min(progress, 100)
+  }, 0)
+  const avgProgress = activeGoals.length > 0 ? totalProgress / activeGoals.length : 0
 
   return {
-    total_goals,
-    completed_goals,
-    active_goals,
-    total_habits: all_habits.length,
-    active_habits: all_habits.length,
-    current_streak,
-    best_streak,
-    weekly_progress,
-    today_habits_completed: today_logs.length,
-    today_habits_total: all_habits.length,
+    activeGoals: activeGoals.length,
+    completedGoals: completedGoals.length,
+    activeHabits: activeHabits.length,
+    todayHabits: todayLogs.length,
+    avgProgress: Math.round(avgProgress),
   }
-}
-
-// ============================================
-// BLOG POSTS
-// ============================================
-
-// Get all published posts (public blog)
-export async function getPublishedBlogPosts(): Promise<BlogPost[]> {
-  return await db
-    .select()
-    .from(blogPosts)
-    .where(eq(blogPosts.isPublished, true))
-    .orderBy(desc(blogPosts.publishedAt))
-}
-
-// Get user's own posts (for blog admin)
-export async function getUserBlogPosts(user_id: string): Promise<BlogPost[]> {
-  return await db
-    .select()
-    .from(blogPosts)
-    .where(eq(blogPosts.userId, user_id))
-    .orderBy(desc(blogPosts.createdAt))
-}
-
-// Get all posts (admin only - for future use)
-export async function getAllBlogPosts(): Promise<BlogPost[]> {
-  return await db
-    .select()
-    .from(blogPosts)
-    .orderBy(desc(blogPosts.createdAt))
-}
-
-export async function getBlogPost(slug: string): Promise<BlogPost | undefined> {
-  const result = await db
-    .select()
-    .from(blogPosts)
-    .where(eq(blogPosts.slug, slug))
-    .limit(1)
-  return result[0]
-}
-
-export async function getBlogPostById(id: string): Promise<BlogPost | undefined> {
-  const result = await db
-    .select()
-    .from(blogPosts)
-    .where(eq(blogPosts.id, id))
-    .limit(1)
-  return result[0]
-}
-
-export async function createBlogPost(user_id: string, data: {
-  title: string
-  slug: string
-  excerpt?: string
-  content: string
-  cover_image?: string
-  category?: string
-  author?: string
-  is_published?: boolean
-}): Promise<BlogPost> {
-  const result = await db
-    .insert(blogPosts)
-    .values({
-      title: data.title,
-      slug: data.slug,
-      excerpt: data.excerpt,
-      content: data.content,
-      coverImage: data.cover_image,
-      category: data.category,
-      author: data.author,
-      userId: user_id,
-      isPublished: data.is_published,
-      publishedAt: data.is_published ? new Date() : null,
-    })
-    .returning()
-  return result[0]
-}
-
-export async function updateBlogPost(id: string, user_id: string, data: Partial<{
-  title: string
-  slug: string
-  excerpt: string
-  content: string
-  cover_image: string
-  category: string
-  author: string
-  is_published: boolean
-}>): Promise<BlogPost> {
-  const update_data: any = {
-    ...(data.title && { title: data.title }),
-    ...(data.slug && { slug: data.slug }),
-    ...(data.excerpt !== undefined && { excerpt: data.excerpt }),
-    ...(data.content && { content: data.content }),
-    ...(data.cover_image !== undefined && { coverImage: data.cover_image }),
-    ...(data.category !== undefined && { category: data.category }),
-    ...(data.author !== undefined && { author: data.author }),
-    ...(data.is_published !== undefined && { isPublished: data.is_published }),
-    updatedAt: new Date(),
-  }
-
-  if (data.is_published && !data.is_published) {
-    update_data.publishedAt = new Date()
-  }
-  
-  const result = await db
-    .update(blogPosts)
-    .set(update_data)
-    .where(and(eq(blogPosts.id, id), eq(blogPosts.userId, user_id)))
-    .returning()
-  return result[0]
-}
-
-export async function deleteBlogPost(id: string, user_id: string): Promise<void> {
-  await db.delete(blogPosts).where(and(eq(blogPosts.id, id), eq(blogPosts.userId, user_id)))
 }
