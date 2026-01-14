@@ -6,85 +6,85 @@ import type { Goal, Habit, HabitLog, GoalProgress, NewGoal, NewHabit, BlogPost }
 // GOALS
 // ============================================
 
-export async function getGoals(userId: string): Promise<Goal[]> {
+export async function getGoals(user_id: string): Promise<Goal[]> {
   return await db
     .select()
     .from(goals)
-    .where(eq(goals.userId, userId))
+    .where(eq(goals.userId, user_id))
     .orderBy(desc(goals.createdAt))
 }
 
-export async function getGoal(id: string, userId: string): Promise<Goal | undefined> {
+export async function getGoal(id: string, user_id: string): Promise<Goal | undefined> {
   const result = await db
     .select()
     .from(goals)
-    .where(and(eq(goals.id, id), eq(goals.userId, userId)))
+    .where(and(eq(goals.id, id), eq(goals.userId, user_id)))
     .limit(1)
   
   return result[0]
 }
 
-export async function getActiveGoals(userId: string): Promise<Goal[]> {
+export async function getActiveGoals(user_id: string): Promise<Goal[]> {
   return await db
     .select()
     .from(goals)
-    .where(and(eq(goals.userId, userId), eq(goals.status, 'active')))
+    .where(and(eq(goals.userId, user_id), eq(goals.status, 'active')))
     .orderBy(desc(goals.createdAt))
 }
 
-export async function createGoal(userId: string, data: Omit<NewGoal, 'userId' | 'id'>): Promise<Goal> {
+export async function createGoal(user_id: string, data: Omit<NewGoal, 'userId' | 'id'>): Promise<Goal> {
   const result = await db
     .insert(goals)
-    .values({ ...data, userId })
+    .values({ ...data, userId: user_id })
     .returning()
   
   return result[0]
 }
 
-export async function updateGoal(id: string, userId: string, data: Partial<Goal>): Promise<Goal> {
+export async function updateGoal(id: string, user_id: string, data: Partial<Goal>): Promise<Goal> {
   const result = await db
     .update(goals)
     .set({ ...data, updatedAt: new Date() })
-    .where(and(eq(goals.id, id), eq(goals.userId, userId)))
+    .where(and(eq(goals.id, id), eq(goals.userId, user_id)))
     .returning()
   
   return result[0]
 }
 
-export async function deleteGoal(id: string, userId: string): Promise<void> {
+export async function deleteGoal(id: string, user_id: string): Promise<void> {
   await db
     .delete(goals)
-    .where(and(eq(goals.id, id), eq(goals.userId, userId)))
+    .where(and(eq(goals.id, id), eq(goals.userId, user_id)))
 }
 
 // ============================================
 // GOAL PROGRESS
 // ============================================
 
-export async function getGoalProgress(goalId: string): Promise<GoalProgress[]> {
+export async function getGoalProgress(goal_id: string): Promise<GoalProgress[]> {
   return await db
     .select()
     .from(goalProgress)
-    .where(eq(goalProgress.goalId, goalId))
+    .where(eq(goalProgress.goalId, goal_id))
     .orderBy(desc(goalProgress.loggedAt))
 }
 
 export async function addGoalProgress(
-  userId: string, 
-  goalId: string, 
+  user_id: string, 
+  goal_id: string, 
   value: number, 
   notes?: string
 ): Promise<GoalProgress> {
   const result = await db
     .insert(goalProgress)
-    .values({ goalId, userId, value, notes })
+    .values({ goalId: goal_id, userId: user_id, value, notes })
     .returning()
 
   // Update goal current value
   const progress = await db
     .select({ total: sql<number>`COALESCE(SUM(${goalProgress.value}), 0)` })
     .from(goalProgress)
-    .where(eq(goalProgress.goalId, goalId))
+    .where(eq(goalProgress.goalId, goal_id))
 
   // Ensure we don't go below 0
   const total = Math.max(0, progress[0]?.total || 0)
@@ -93,26 +93,26 @@ export async function addGoalProgress(
   const goal = await db
     .select()
     .from(goals)
-    .where(eq(goals.id, goalId))
+    .where(eq(goals.id, goal_id))
     .limit(1)
 
   if (goal[0]) {
-    const newStatus = total >= goal[0].targetValue ? 'completed' : 'active'
+    const new_status = total >= goal[0].targetValue ? 'completed' : 'active'
     await db
       .update(goals)
-      .set({ currentValue: total, status: newStatus, updatedAt: new Date() })
-      .where(eq(goals.id, goalId))
+      .set({ currentValue: total, status: new_status, updatedAt: new Date() })
+      .where(eq(goals.id, goal_id))
   }
 
   return result[0]
 }
 
-export async function deleteGoalProgress(id: string, userId: string): Promise<void> {
+export async function deleteGoalProgress(id: string, user_id: string): Promise<void> {
   // Get the progress entry first
   const entry = await db
     .select()
     .from(goalProgress)
-    .where(and(eq(goalProgress.id, id), eq(goalProgress.userId, userId)))
+    .where(and(eq(goalProgress.id, id), eq(goalProgress.userId, user_id)))
     .limit(1)
 
   if (entry[0]) {
@@ -139,78 +139,78 @@ export async function deleteGoalProgress(id: string, userId: string): Promise<vo
 // HABITS
 // ============================================
 
-export async function getHabits(userId: string): Promise<Habit[]> {
+export async function getHabits(user_id: string): Promise<Habit[]> {
   return await db
     .select()
     .from(habits)
-    .where(and(eq(habits.userId, userId), eq(habits.isActive, true)))
+    .where(and(eq(habits.userId, user_id), eq(habits.isActive, true)))
     .orderBy(desc(habits.createdAt))
 }
 
-export async function getHabit(id: string, userId: string): Promise<Habit | undefined> {
+export async function getHabit(id: string, user_id: string): Promise<Habit | undefined> {
   const result = await db
     .select()
     .from(habits)
-    .where(and(eq(habits.id, id), eq(habits.userId, userId)))
+    .where(and(eq(habits.id, id), eq(habits.userId, user_id)))
     .limit(1)
   
   return result[0]
 }
 
-export async function createHabit(userId: string, data: Omit<NewHabit, 'userId' | 'id'>): Promise<Habit> {
+export async function createHabit(user_id: string, data: Omit<NewHabit, 'userId' | 'id'>): Promise<Habit> {
   const result = await db
     .insert(habits)
-    .values({ ...data, userId })
+    .values({ ...data, userId: user_id })
     .returning()
   
   return result[0]
 }
 
-export async function updateHabit(id: string, userId: string, data: Partial<Habit>): Promise<Habit> {
+export async function updateHabit(id: string, user_id: string, data: Partial<Habit>): Promise<Habit> {
   const result = await db
     .update(habits)
     .set({ ...data, updatedAt: new Date() })
-    .where(and(eq(habits.id, id), eq(habits.userId, userId)))
+    .where(and(eq(habits.id, id), eq(habits.userId, user_id)))
     .returning()
   
   return result[0]
 }
 
-export async function deleteHabit(id: string, userId: string): Promise<void> {
+export async function deleteHabit(id: string, user_id: string): Promise<void> {
   await db
     .update(habits)
     .set({ isActive: false, updatedAt: new Date() })
-    .where(and(eq(habits.id, id), eq(habits.userId, userId)))
+    .where(and(eq(habits.id, id), eq(habits.userId, user_id)))
 }
 
 // ============================================
 // HABIT LOGS
 // ============================================
 
-export async function getHabitLogs(userId: string, startDate: string, endDate: string): Promise<HabitLog[]> {
+export async function getHabitLogs(user_id: string, start_date: string, end_date: string): Promise<HabitLog[]> {
   return await db
     .select()
     .from(habitLogs)
     .where(
       and(
-        eq(habitLogs.userId, userId),
-        gte(habitLogs.completedAt, startDate),
-        lte(habitLogs.completedAt, endDate)
+        eq(habitLogs.userId, user_id),
+        gte(habitLogs.completedAt, start_date),
+        lte(habitLogs.completedAt, end_date)
       )
     )
 }
 
-export async function getTodayHabitLogs(userId: string): Promise<HabitLog[]> {
+export async function getTodayHabitLogs(user_id: string): Promise<HabitLog[]> {
   const today = new Date().toISOString().split('T')[0]
   return await db
     .select()
     .from(habitLogs)
-    .where(and(eq(habitLogs.userId, userId), eq(habitLogs.completedAt, today)))
+    .where(and(eq(habitLogs.userId, user_id), eq(habitLogs.completedAt, today)))
 }
 
 export async function toggleHabitLog(
-  userId: string, 
-  habitId: string, 
+  user_id: string, 
+  habit_id: string, 
   date: string
 ): Promise<{ completed: boolean }> {
   // Check if log exists
@@ -219,8 +219,8 @@ export async function toggleHabitLog(
     .from(habitLogs)
     .where(
       and(
-        eq(habitLogs.habitId, habitId),
-        eq(habitLogs.userId, userId),
+        eq(habitLogs.habitId, habit_id),
+        eq(habitLogs.userId, user_id),
         eq(habitLogs.completedAt, date)
       )
     )
@@ -229,33 +229,33 @@ export async function toggleHabitLog(
   if (existing[0]) {
     // Delete (uncheck)
     await db.delete(habitLogs).where(eq(habitLogs.id, existing[0].id))
-    await updateHabitStreak(habitId)
+    await updateHabitStreak(habit_id)
     return { completed: false }
   } else {
     // Create (check)
-    await db.insert(habitLogs).values({ habitId, userId, completedAt: date })
-    await updateHabitStreak(habitId)
+    await db.insert(habitLogs).values({ habitId: habit_id, userId: user_id, completedAt: date })
+    await updateHabitStreak(habit_id)
     return { completed: true }
   }
 }
 
-async function updateHabitStreak(habitId: string): Promise<void> {
+async function updateHabitStreak(habit_id: string): Promise<void> {
   const today = new Date()
-  let currentStreak = 0
-  let checkDate = new Date(today)
+  let current_streak = 0
+  let check_date = new Date(today)
 
   // Count consecutive days backwards
   while (true) {
-    const dateStr = checkDate.toISOString().split('T')[0]
+    const date_str = check_date.toISOString().split('T')[0]
     const log = await db
       .select()
       .from(habitLogs)
-      .where(and(eq(habitLogs.habitId, habitId), eq(habitLogs.completedAt, dateStr)))
+      .where(and(eq(habitLogs.habitId, habit_id), eq(habitLogs.completedAt, date_str)))
       .limit(1)
 
     if (log[0]) {
-      currentStreak++
-      checkDate.setDate(checkDate.getDate() - 1)
+      current_streak++
+      check_date.setDate(check_date.getDate() - 1)
     } else {
       break
     }
@@ -265,15 +265,15 @@ async function updateHabitStreak(habitId: string): Promise<void> {
   const habit = await db
     .select()
     .from(habits)
-    .where(eq(habits.id, habitId))
+    .where(eq(habits.id, habit_id))
     .limit(1)
 
   if (habit[0]) {
-    const bestStreak = Math.max(habit[0].streakBest, currentStreak)
+    const best_streak = Math.max(habit[0].streakBest, current_streak)
     await db
       .update(habits)
-      .set({ streakCurrent: currentStreak, streakBest: bestStreak, updatedAt: new Date() })
-      .where(eq(habits.id, habitId))
+      .set({ streakCurrent: current_streak, streakBest: best_streak, updatedAt: new Date() })
+      .where(eq(habits.id, habit_id))
   }
 }
 
@@ -281,49 +281,49 @@ async function updateHabitStreak(habitId: string): Promise<void> {
 // DASHBOARD STATS
 // ============================================
 
-export async function getDashboardStats(userId: string) {
+export async function getDashboardStats(user_id: string) {
   const today = new Date().toISOString().split('T')[0]
-  const weekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]
+  const week_ago = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]
 
   // Get goals counts
-  const allGoals = await db.select().from(goals).where(eq(goals.userId, userId))
-  const totalGoals = allGoals.length
-  const completedGoals = allGoals.filter(g => g.status === 'completed').length
-  const activeGoals = allGoals.filter(g => g.status === 'active').length
+  const all_goals = await db.select().from(goals).where(eq(goals.userId, user_id))
+  const total_goals = all_goals.length
+  const completed_goals = all_goals.filter(g => g.status === 'completed').length
+  const active_goals = all_goals.filter(g => g.status === 'active').length
 
   // Get habits
-  const allHabits = await db
+  const all_habits = await db
     .select()
     .from(habits)
-    .where(and(eq(habits.userId, userId), eq(habits.isActive, true)))
+    .where(and(eq(habits.userId, user_id), eq(habits.isActive, true)))
 
   // Get today's logs
-  const todayLogs = await getTodayHabitLogs(userId)
+  const today_logs = await getTodayHabitLogs(user_id)
 
   // Get week logs
-  const weekLogs = await getHabitLogs(userId, weekAgo, today)
+  const week_logs = await getHabitLogs(user_id, week_ago, today)
 
   // Calculate streaks
-  const currentStreak = Math.max(...allHabits.map(h => h.streakCurrent), 0)
-  const bestStreak = Math.max(...allHabits.map(h => h.streakBest), 0)
+  const current_streak = Math.max(...all_habits.map(h => h.streakCurrent), 0)
+  const best_streak = Math.max(...all_habits.map(h => h.streakBest), 0)
 
   // Weekly progress
-  const totalPossibleWeek = allHabits.length * 7
-  const weeklyProgress = totalPossibleWeek > 0 
-    ? Math.round((weekLogs.length / totalPossibleWeek) * 100) 
+  const total_possible_week = all_habits.length * 7
+  const weekly_progress = total_possible_week > 0 
+    ? Math.round((week_logs.length / total_possible_week) * 100) 
     : 0
 
   return {
-    totalGoals,
-    completedGoals,
-    activeGoals,
-    totalHabits: allHabits.length,
-    activeHabits: allHabits.length,
-    currentStreak,
-    bestStreak,
-    weeklyProgress,
-    todayHabitsCompleted: todayLogs.length,
-    todayHabitsTotal: allHabits.length,
+    total_goals,
+    completed_goals,
+    active_goals,
+    total_habits: all_habits.length,
+    active_habits: all_habits.length,
+    current_streak,
+    best_streak,
+    weekly_progress,
+    today_habits_completed: today_logs.length,
+    today_habits_total: all_habits.length,
   }
 }
 
@@ -341,11 +341,11 @@ export async function getPublishedBlogPosts(): Promise<BlogPost[]> {
 }
 
 // Get user's own posts (for blog admin)
-export async function getUserBlogPosts(userId: string): Promise<BlogPost[]> {
+export async function getUserBlogPosts(user_id: string): Promise<BlogPost[]> {
   return await db
     .select()
     .from(blogPosts)
-    .where(eq(blogPosts.userId, userId))
+    .where(eq(blogPosts.userId, user_id))
     .orderBy(desc(blogPosts.createdAt))
 }
 
@@ -375,41 +375,68 @@ export async function getBlogPostById(id: string): Promise<BlogPost | undefined>
   return result[0]
 }
 
-export async function createBlogPost(userId: string, data: {
+export async function createBlogPost(user_id: string, data: {
   title: string
   slug: string
   excerpt?: string
   content: string
-  coverImage?: string
+  cover_image?: string
   category?: string
   author?: string
-  isPublished?: boolean
+  is_published?: boolean
 }): Promise<BlogPost> {
   const result = await db
     .insert(blogPosts)
     .values({
-      ...data,
-      userId,
-      publishedAt: data.isPublished ? new Date() : null,
+      title: data.title,
+      slug: data.slug,
+      excerpt: data.excerpt,
+      content: data.content,
+      coverImage: data.cover_image,
+      category: data.category,
+      author: data.author,
+      userId: user_id,
+      isPublished: data.is_published,
+      publishedAt: data.is_published ? new Date() : null,
     })
     .returning()
   return result[0]
 }
 
-export async function updateBlogPost(id: string, userId: string, data: Partial<BlogPost>): Promise<BlogPost> {
-  const updateData: any = { ...data, updatedAt: new Date() }
-  if (data.isPublished && !data.publishedAt) {
-    updateData.publishedAt = new Date()
+export async function updateBlogPost(id: string, user_id: string, data: Partial<{
+  title: string
+  slug: string
+  excerpt: string
+  content: string
+  cover_image: string
+  category: string
+  author: string
+  is_published: boolean
+}>): Promise<BlogPost> {
+  const update_data: any = {
+    ...(data.title && { title: data.title }),
+    ...(data.slug && { slug: data.slug }),
+    ...(data.excerpt !== undefined && { excerpt: data.excerpt }),
+    ...(data.content && { content: data.content }),
+    ...(data.cover_image !== undefined && { coverImage: data.cover_image }),
+    ...(data.category !== undefined && { category: data.category }),
+    ...(data.author !== undefined && { author: data.author }),
+    ...(data.is_published !== undefined && { isPublished: data.is_published }),
+    updatedAt: new Date(),
+  }
+
+  if (data.is_published && !data.is_published) {
+    update_data.publishedAt = new Date()
   }
   
   const result = await db
     .update(blogPosts)
-    .set(updateData)
-    .where(and(eq(blogPosts.id, id), eq(blogPosts.userId, userId)))
+    .set(update_data)
+    .where(and(eq(blogPosts.id, id), eq(blogPosts.userId, user_id)))
     .returning()
   return result[0]
 }
 
-export async function deleteBlogPost(id: string, userId: string): Promise<void> {
-  await db.delete(blogPosts).where(and(eq(blogPosts.id, id), eq(blogPosts.userId, userId)))
+export async function deleteBlogPost(id: string, user_id: string): Promise<void> {
+  await db.delete(blogPosts).where(and(eq(blogPosts.id, id), eq(blogPosts.userId, user_id)))
 }
