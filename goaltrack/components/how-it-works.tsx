@@ -24,7 +24,7 @@ export function HowItWorks() {
     <section id="kako-radi" className="bg-white px-4 py-16 md:py-24">
       <div className="mx-auto max-w-7xl">
         <div className="mb-8 flex items-center justify-center">
-          <span className="rounded-full bg-purple-50 px-4 py-2 text-sm text-purple-600">✨ Rivalo</span>
+          <span className="rounded-full bg-purple-50 px-4 py-2 text-sm text-purple-600">🚀 Kako radi</span>
         </div>
 
         <div className="mb-12 text-center">
@@ -57,7 +57,7 @@ export function HowItWorks() {
 
           <div className="relative flex items-center justify-center">
             <div className="relative h-64 w-full overflow-hidden rounded-2xl md:h-[500px]">
-              <Image src="/images/slika.png" alt="Team collaboration" fill className="object-cover" />
+              <Image src="https://images.unsplash.com/photo-1600880292203-757bb62b4baf?w=800&auto=format&fit=crop&q=80" alt="Team collaboration" fill className="object-cover" />
             </div>
           </div>
         </div>

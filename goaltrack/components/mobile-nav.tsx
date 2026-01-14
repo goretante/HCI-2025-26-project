@@ -48,9 +48,11 @@ export function MobileNav() {
               Blog
             </Link>
             <div className="border-t px-3 py-3">
-              <Button className="w-full bg-blue-600 hover:bg-blue-700" onClick={() => setIsOpen(false)}>
-                Prijava/Registracija
-              </Button>
+              <Link href="/login" onClick={() => setIsOpen(false)}>
+                <Button className="w-full bg-blue-600 hover:bg-blue-700">
+                  Prijava/Registracija
+                </Button>
+              </Link>
             </div>
           </nav>
         </div>

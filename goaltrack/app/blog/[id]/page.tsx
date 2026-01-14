@@ -1,120 +1,190 @@
+import { getBlogPostById } from "@/lib/contentful"
+import Image from "next/image"
 import Link from "next/link"
-import { Suspense } from "react"
-import { ArrowLeft } from "lucide-react"
+import { documentToReactComponents } from "@contentful/rich-text-react-renderer"
+import { BLOCKS, MARKS } from "@contentful/rich-text-types"
+import { ChevronLeft } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { BlogPostDetailSkeleton } from "@/components/blog-skeleton"
+import { notFound } from "next/navigation"
 
-interface Post {
-  userId: number
-  id: number
-  title: string
-  body: string
-}
+export const dynamicParams = true
+export const revalidate = 60
 
-interface PageProps {
-  params: Promise<{
-    id: string
-  }>
-}
-
-async function getPost(id: string): Promise<Post | null> {
+export async function generateMetadata({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params
+  
   try {
-    const res = await fetch(`https://jsonplaceholder.typicode.com/posts/${id}`, {
-      next: { revalidate: 3600 },
-    })
-    if (!res.ok) throw new Error("Failed to fetch post")
-    return res.json()
+    const post = await getBlogPostById(id)
+
+    if (!post) {
+      return {
+        title: "Članak nije pronađen",
+        description: "Traženi članak nije dostupan",
+      }
+    }
+
+    return {
+      title: `${post.title} - GoalTrack Blog`,
+      description: post.title,
+    }
   } catch (error) {
-    console.error("Error fetching post:", error)
-    return null
+    return {
+      title: "Greška",
+      description: "Došlo je do greške pri učitavanju članka",
+    }
   }
 }
 
-async function BlogPostContent({ id }: { id: string }) {
-  const post = await getPost(id)
+export default async function BlogPostPage({ 
+  params 
+}: { 
+  params: Promise<{ id: string }> 
+}) {
+  const { id } = await params
+  
+  console.log('📄 Učitavanje blog članka sa id:', id, 'tip:', typeof id)
+  
+  let post
+  try {
+    post = await getBlogPostById(id)
+    console.log('✅ Članak učitan:', post?.id, post?.title)
+  } catch (error) {
+    console.error('❌ Greška pri dohvaćanju članka:', error)
+    notFound()
+  }
 
   if (!post) {
-    return (
-      <section className="px-4 py-12">
-        <div className="mx-auto max-w-3xl text-center">
-          <h1 className="mb-4 text-3xl font-bold">Blog post nije pronađen</h1>
-          <p className="mb-6 text-gray-600">Izvinjavam se, blog post koji tražite ne postoji.</p>
-          <Link href="/blog">
-            <Button className="bg-blue-600 hover:bg-blue-700">Povratak na blog</Button>
-          </Link>
-        </div>
-      </section>
-    )
+    console.log('⚠️ Članak je null, pozivam notFound()')
+    notFound()
   }
 
-  return (
-    <section className="px-4 py-8 md:py-12">
-      <div className="mx-auto max-w-3xl">
-        <Link href="/blog" className="mb-6 inline-flex items-center gap-2 text-blue-600 hover:text-blue-700">
-          <ArrowLeft className="h-4 w-4" />
-          Povratak na blog
-        </Link>
-
-        <article className="rounded-lg bg-white p-8 shadow-sm md:p-12">
-          <div className="mb-6 border-b pb-6">
-            <span className="text-sm font-semibold uppercase tracking-wider text-blue-600">
-              Članak #{post.id}
-            </span>
-            <h1 className="mt-2 text-4xl font-bold md:text-5xl">{post.title}</h1>
-            <div className="mt-4 flex items-center gap-4 text-sm text-gray-600">
-              <span>18. siječnja 2025.</span>
-              <span>•</span>
-              <span>~{Math.ceil(post.body.split(" ").length / 200)} min čitanja</span>
-            </div>
-          </div>
-
-          <div className="prose prose-lg max-w-none">
-            {post.body.split("\n\n").map((paragraph, index) => (
-              <p key={index} className="mb-6 leading-relaxed text-gray-700">
-                {paragraph}
-              </p>
-            ))}
-          </div>
-
-          <div className="mt-12 border-t pt-8">
-            <p className="mb-6 text-sm text-gray-600">
-              Jeste li zainteresirani za postavljanje ciljeva i izgradnju navika? Pokrenite svoju GoalTrack putanju
-              hoje.
-            </p>
-            <Link href="/">
-              <Button className="bg-blue-600 hover:bg-blue-700">Počnite s GoalTrackom</Button>
-            </Link>
-          </div>
-        </article>
-      </div>
-    </section>
-  )
-}
-
-export async function generateMetadata({ params }: PageProps) {
-  const post = await getPost((await params).id)
-  return {
-    title: post?.title ? `${post.title} - GoalTrack Blog` : "Blog Post - GoalTrack",
-    description: post?.body?.substring(0, 160) || "Čitaj blog post na GoalTracku",
+  const richTextOptions = {
+    renderMark: {
+      [MARKS.BOLD]: (text: any) => <strong className="font-bold">{text}</strong>,
+      [MARKS.ITALIC]: (text: any) => <em className="italic">{text}</em>,
+      [MARKS.UNDERLINE]: (text: any) => <u className="underline">{text}</u>,
+      [MARKS.CODE]: (text: any) => (
+        <code className="bg-gray-200 text-gray-800 px-2 py-1 rounded font-mono text-sm">
+          {text}
+        </code>
+      ),
+    },
+    renderNode: {
+      [BLOCKS.PARAGRAPH]: (node: any, children: any) => (
+        <p className="mb-4 leading-relaxed text-gray-700">{children}</p>
+      ),
+      [BLOCKS.HEADING_1]: (node: any, children: any) => (
+        <h1 className="text-4xl font-bold mb-6 mt-8 text-gray-900">{children}</h1>
+      ),
+      [BLOCKS.HEADING_2]: (node: any, children: any) => (
+        <h2 className="text-3xl font-bold mb-4 mt-6 text-gray-900">{children}</h2>
+      ),
+      [BLOCKS.HEADING_3]: (node: any, children: any) => (
+        <h3 className="text-2xl font-bold mb-3 mt-5 text-gray-900">{children}</h3>
+      ),
+      [BLOCKS.HEADING_4]: (node: any, children: any) => (
+        <h4 className="text-xl font-bold mb-2 mt-4 text-gray-900">{children}</h4>
+      ),
+      [BLOCKS.UL_LIST]: (node: any, children: any) => (
+        <ul className="list-disc mb-4 space-y-2 text-gray-700 pl-6">{children}</ul>
+      ),
+      [BLOCKS.OL_LIST]: (node: any, children: any) => (
+        <ol className="list-decimal mb-4 space-y-2 text-gray-700 pl-6">{children}</ol>
+      ),
+      [BLOCKS.LIST_ITEM]: (node: any, children: any) => (
+        <li className="text-gray-700">{children}</li>
+      ),
+      [BLOCKS.QUOTE]: (node: any, children: any) => (
+        <blockquote className="border-l-4 border-blue-500 pl-4 italic my-4 text-gray-700 bg-gray-50 py-4 pr-4">
+          {children}
+        </blockquote>
+      ),
+      [BLOCKS.HR]: () => <hr className="my-8 border-gray-300" />,
+    },
   }
-}
-
-export async function generateStaticParams() {
-  const res = await fetch("https://jsonplaceholder.typicode.com/posts")
-  const posts: Post[] = await res.json()
-  return posts.slice(0, 20).map((post) => ({
-    id: String(post.id),
-  }))
-}
-
-export default async function BlogPostPage({ params }: PageProps) {
-  const { id } = await params
 
   return (
     <main className="min-h-screen bg-gray-50">
-      <Suspense fallback={<BlogPostDetailSkeleton />}>
-        <BlogPostContent id={id} />
-      </Suspense>
+      {/* Navigation */}
+      <div className="bg-white border-b border-gray-200 sticky top-0 z-40">
+        <div className="mx-auto max-w-4xl px-4 py-4">
+          <Link href="/blog">
+            <Button variant="ghost" className="gap-2">
+              <ChevronLeft className="h-4 w-4" />
+              Nazad na blog
+            </Button>
+          </Link>
+        </div>
+      </div>
+
+      {/* Article */}
+      <article className="mx-auto max-w-4xl px-4 py-12 md:py-20">
+        {/* Featured Image */}
+        {post.medij?.url && (
+          <div className="relative w-full h-96 rounded-2xl overflow-hidden mb-8 shadow-lg">
+            <Image
+              src={post.medij.url}
+              alt={post.medij.title || post.title}
+              fill
+              className="object-cover"
+              priority
+            />
+          </div>
+        )}
+
+        {/* Title */}
+        <div className="mb-8">
+          <h1 className="text-4xl md:text-5xl font-bold mb-4 text-gray-900">
+            {post.title}
+          </h1>
+          <div className="flex items-center gap-4 text-gray-600">
+            <div className="flex items-center gap-2">
+              <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-purple-600"></div>
+              <span>GoalTrack</span>
+            </div>
+            <span>•</span>
+            <span>Blog članak</span>
+          </div>
+        </div>
+
+        {/* Content */}
+        <div className="max-w-none mb-12 text-gray-800">
+          {post.richText ? (
+            documentToReactComponents(post.richText, richTextOptions)
+          ) : (
+            <p className="text-gray-600">Nema sadržaja za ovaj članak.</p>
+          )}
+        </div>
+
+        {/* Footer */}
+        <div className="border-t border-gray-200 pt-8 mt-12">
+          <div className="flex items-center gap-4 mb-6">
+            <div className="w-16 h-16 rounded-full bg-gradient-to-br from-blue-500 to-purple-600"></div>
+            <div>
+              <p className="font-bold text-gray-900">GoalTrack</p>
+              <p className="text-sm text-gray-600">Postavljajte ciljeve i gradite navike</p>
+            </div>
+          </div>
+          
+          <Link href="/blog">
+            <Button className="gap-2 bg-blue-600 hover:bg-blue-700">
+              <ChevronLeft className="h-4 w-4" />
+              Vidi sve članke
+            </Button>
+          </Link>
+        </div>
+      </article>
+
+      {/* Related Posts */}
+      <section className="bg-white border-t border-gray-200 py-12 md:py-20">
+        <div className="mx-auto max-w-7xl px-4">
+          <h2 className="text-3xl font-bold mb-8">Više članaka</h2>
+          
+          <div className="grid gap-6 md:grid-cols-3">
+            <p className="text-gray-500 col-span-full">Više članaka će biti dostupno uskoro</p>
+          </div>
+        </div>
+      </section>
     </main>
   )
 }

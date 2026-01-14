@@ -1,6 +1,6 @@
-import { Button } from "@/components/ui/button"
 import Link from "next/link"
 import { MobileNav } from "@/components/mobile-nav"
+import { AuthButton } from "@/components/auth/auth-button"
 
 export function Header() {
   return (
@@ -26,7 +26,7 @@ export function Header() {
         </nav>
 
         <div className="hidden md:block">
-          <Button className="bg-blue-600 hover:bg-blue-700">Prijava/Registracija</Button>
+          <AuthButton />
         </div>
 
         <MobileNav />

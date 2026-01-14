@@ -1,5 +1,6 @@
 import { Button } from "@/components/ui/button"
 import { Check } from "lucide-react"
+import Link from "next/link"
 
 const benefits = ["Besplatno za uvijek", "Neograničen broj ciljeva", "Detaljna analitika", "Mobilna aplikacija"]
 
@@ -29,13 +30,12 @@ export function CTA() {
             </div>
 
             <div className="flex flex-col gap-4 sm:flex-row sm:justify-center">
-              <Button size="lg" className="w-full sm:w-auto bg-white text-purple-600 hover:bg-gray-100">
-                Kreirajte besplatni račun
-                <span className="ml-2">→</span>
-              </Button>
-              <Button size="lg" variant="outline" className="w-full sm:w-auto border-white bg-transparent text-white hover:bg-white/10">
-                Kontaktirajte nas
-              </Button>
+              <Link href="/login">
+                <Button size="lg" className="w-full sm:w-auto bg-white text-purple-600 hover:bg-gray-100">
+                  Kreirajte besplatni račun
+                  <span className="ml-2">→</span>
+                </Button>
+              </Link>
             </div>
           </div>
         </div>

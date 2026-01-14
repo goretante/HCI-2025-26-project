@@ -1,5 +1,5 @@
 import type React from "react"
-import type { Metadata } from "next"
+import type { Metadata, Viewport } from "next"
 import { Geist, Geist_Mono } from "next/font/google"
 import { Analytics } from "@vercel/analytics/next"
 import { ScrollAnimationProvider } from "@/components/scroll-animation"
@@ -9,11 +9,15 @@ import { Header } from "@/components/header"
 const _geist = Geist({ subsets: ["latin"] })
 const _geistMono = Geist_Mono({ subsets: ["latin"] })
 
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+}
+
 export const metadata: Metadata = {
   title: "GoalTrack - Pratite ciljeve i navike jednostavno",
   description: "Moćni alati dizajnirani da vam pomognu da postavite, pratite i ostvarite svoje ciljeve i navike",
   generator: "v0.app",
-  viewport: "width=device-width, initial-scale=1",
   icons: {
     icon: [
       {

@@ -25,4 +25,5 @@
 - Link to Assignment 2: [**Assignment 2**](https://github.com/goretante/HCI-2025-26-project/blob/main/assignments/2nd%20assignment/2nd%20assignment.md)
 - Link to Assignment 3: [**Assignment 3**](https://github.com/goretante/HCI-2025-26-project/blob/main/assignments/3rd%20assignment/3rd%20assignment.md)
 - Link to Assignment 4: [**Assignment 4**](https://github.com/goretante/HCI-2025-26-project/blob/main/assignments/4th%20assignment/4th%20assignment.md)
+- Link to Assignment 5: [**Assignment 5**](https://github.com/goretante/HCI-2025-26-project/blob/main/assignments/5th%20assignment/5th%20assignment.md)
 <!-- Add more assignments as necessary -->

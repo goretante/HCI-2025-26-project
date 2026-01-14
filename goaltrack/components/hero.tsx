@@ -1,5 +1,6 @@
 import { Button } from "@/components/ui/button"
 import Image from "next/image"
+import Link from "next/link"
 
 export function Hero() {
   return (
@@ -22,10 +23,12 @@ export function Hero() {
             </p>
 
             <div className="flex flex-col gap-4 sm:flex-row">
-              <Button size="lg" className="w-full sm:w-auto bg-blue-600 hover:bg-blue-700">
-                Počnite besplatno
-                <span className="ml-2">→</span>
-              </Button>
+              <Link href="/login">
+                <Button size="lg" className="w-full sm:w-auto bg-blue-600 hover:bg-blue-700">
+                  Počnite besplatno
+                  <span className="ml-2">→</span>
+                </Button>
+              </Link>
             </div>
 
             <div className="mt-12 grid grid-cols-2 gap-8">
@@ -43,7 +46,7 @@ export function Hero() {
           <div className="relative flex items-center justify-center">
             <div className="relative h-56 w-full overflow-hidden rounded-2xl shadow-2xl sm:h-72 md:h-[450px] lg:h-[500px]">
               <Image
-                src="/images/slika.png"
+                src="https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=800&auto=format&fit=crop&q=80"
                 alt="Professional celebrating success"
                 fill
                 className="object-cover"
