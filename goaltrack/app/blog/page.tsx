@@ -9,10 +9,10 @@ const POSTS_PER_PAGE = 9
 
 export const metadata = {
   title: "Blog - GoalTrack",
-  description: "Read tips and articles about goal setting and habit building",
+  description: "Pročitajte savjete i članke o postavljanju ciljeva i izgradnji navika",
 }
 
-// Function that extracts text from rich text structure
+// Funkcija koja ekstrahira tekst iz rich text strukture
 function extractTextFromRichText(richText: any): string {
   if (!richText) return ""
   
@@ -51,15 +51,15 @@ export default async function BlogPage({
         <div className="bg-gradient-to-r from-purple-600 to-blue-600 py-12 px-4">
           <div className="mx-auto max-w-4xl">
             <h1 className="mb-2 text-4xl font-bold text-white">GoalTrack Blog</h1>
-            <p className="text-lg text-purple-100">Tips and inspiration to achieve your goals</p>
+            <p className="text-lg text-purple-100">Savjeti i inspiracija za postizanje vaših ciljeva</p>
           </div>
         </div>
 
         <section className="px-4 py-12 md:py-20">
           <div className="mx-auto max-w-7xl text-center py-16">
             <Calendar className="h-20 w-20 text-gray-300 mx-auto mb-4" />
-            <h3 className="text-xl font-bold text-gray-700 mb-2">No published articles yet</h3>
-            <p className="text-gray-500">Articles will appear here when published.</p>
+            <h3 className="text-xl font-bold text-gray-700 mb-2">Još nema objavljenih članaka</h3>
+            <p className="text-gray-500">Članci će se pojaviti ovdje kada budu objavljeni.</p>
           </div>
         </section>
       </main>
@@ -72,11 +72,11 @@ export default async function BlogPage({
 
   return (
     <main className="min-h-screen bg-gray-50">
-      {/* Header */}
+      {/* Zaglavlje */}
       <div className="bg-gradient-to-r from-purple-600 to-blue-600 py-12 px-4">
         <div className="mx-auto max-w-4xl">
           <h1 className="mb-2 text-4xl font-bold text-white">GoalTrack Blog</h1>
-          <p className="text-lg text-purple-100">Tips and inspiration to achieve your goals</p>
+          <p className="text-lg text-purple-100">Savjeti i inspiracija za postizanje vaših ciljeva</p>
         </div>
       </div>
 
@@ -85,7 +85,7 @@ export default async function BlogPage({
           <div className="mb-12 text-center">
             <h1 className="mb-4 text-4xl font-bold md:text-5xl">Blog</h1>
             <p className="mx-auto max-w-2xl text-lg text-gray-600">
-              Read tips, tricks and articles about goal setting, habit building and achieving success
+              Pročitajte savjete, trikove i članke o postavljanju ciljeva, izgradnji navika i postizanju uspjeha
             </p>
           </div>
 
@@ -96,7 +96,7 @@ export default async function BlogPage({
               return (
                 <Link key={post.id} href={`/blog/${post.id}`}>
                   <article className="group overflow-hidden rounded-2xl bg-white shadow-sm transition-all hover:shadow-lg border border-gray-100 h-full flex flex-col cursor-pointer">
-                    {/* Featured Image */}
+                    {/* Istaknuta slika */}
                     {post.medij?.url && (
                       <div className="relative h-48 w-full overflow-hidden bg-gray-200">
                         <Image
@@ -110,22 +110,22 @@ export default async function BlogPage({
                     )}
 
                     <div className="p-6 flex flex-col flex-grow">
-                      {/* Title */}
+                      {/* Naslov */}
                       <h2 className="mb-3 text-xl font-bold line-clamp-2 group-hover:text-blue-600 transition-colors">
                         {post.title}
                       </h2>
 
-                      {/* Text Preview - plain text only */}
+                      {/* Pregled teksta - samo obični tekst */}
                       {excerpt && (
                         <p className="mb-4 flex-grow text-sm text-gray-600 line-clamp-3 leading-relaxed">
                           {excerpt}
                         </p>
                       )}
 
-                      {/* CTA Button */}
+                      {/* CTA gumb */}
                       <div className="mt-auto pt-4 border-t border-gray-100">
                         <Button className="w-full bg-blue-600 hover:bg-blue-700">
-                          Read article
+                          Pročitaj članak
                         </Button>
                       </div>
                     </div>
@@ -135,7 +135,7 @@ export default async function BlogPage({
             })}
           </div>
 
-          {/* Pagination */}
+          {/* Paginacija */}
           {totalPages > 1 && (
             <div className="mt-12 flex flex-col items-center gap-6">
               <div className="flex items-center gap-2 flex-wrap justify-center">
@@ -149,7 +149,7 @@ export default async function BlogPage({
                     disabled={page === 1}
                   >
                     <ChevronLeft className="h-4 w-4" />
-                    <span className="hidden sm:inline">Previous</span>
+                    <span className="hidden sm:inline">Prethodna</span>
                   </Button>
                 </Link>
 
@@ -178,14 +178,14 @@ export default async function BlogPage({
                     className={`gap-2 ${page === totalPages ? "opacity-50 cursor-not-allowed" : ""}`}
                     disabled={page === totalPages}
                   >
-                    <span className="hidden sm:inline">Next</span>
+                    <span className="hidden sm:inline">Sljedeća</span>
                     <ChevronRight className="h-4 w-4" />
                   </Button>
                 </Link>
               </div>
 
               <p className="text-sm text-gray-500">
-                Page <span className="font-semibold text-gray-700">{page}</span> of <span className="font-semibold text-gray-700">{totalPages}</span>
+                Stranica <span className="font-semibold text-gray-700">{page}</span> od <span className="font-semibold text-gray-700">{totalPages}</span>
               </p>
             </div>
           )}
