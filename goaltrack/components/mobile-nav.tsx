@@ -1,12 +1,29 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import Link from "next/link"
 import { Menu, X } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import { createClient } from "@/lib/supabase/client"
 
 export function MobileNav() {
   const [isOpen, setIsOpen] = useState(false)
+  const [user, setUser] = useState<any>(null)
+  const supabase = createClient()
+
+  useEffect(() => {
+    const checkUser = async () => {
+      const { data: { user } } = await supabase.auth.getUser()
+      setUser(user)
+    }
+    checkUser()
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user ?? null)
+    })
+
+    return () => subscription.unsubscribe()
+  }, [])
 
   return (
     <div className="md:hidden">
@@ -48,11 +65,19 @@ export function MobileNav() {
               Blog
             </Link>
             <div className="border-t px-3 py-3">
-              <Link href="/login" onClick={() => setIsOpen(false)}>
-                <Button className="w-full bg-blue-600 hover:bg-blue-700">
-                  Prijava/Registracija
-                </Button>
-              </Link>
+              {user ? (
+                <Link href="/dashboard" onClick={() => setIsOpen(false)}>
+                  <Button className="w-full bg-blue-600 hover:bg-blue-700">
+                    Dashboard
+                  </Button>
+                </Link>
+              ) : (
+                <Link href="/login" onClick={() => setIsOpen(false)}>
+                  <Button className="w-full bg-blue-600 hover:bg-blue-700">
+                    Prijava/Registracija
+                  </Button>
+                </Link>
+              )}
             </div>
           </nav>
         </div>

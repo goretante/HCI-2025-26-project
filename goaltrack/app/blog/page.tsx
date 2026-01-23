@@ -139,19 +139,23 @@ export default async function BlogPage({
           {totalPages > 1 && (
             <div className="mt-12 flex flex-col items-center gap-6">
               <div className="flex items-center gap-2 flex-wrap justify-center">
-                <Link 
-                  href={page > 1 ? `/blog?page=${page - 1}` : "#"}
-                  className={page === 1 ? "pointer-events-none" : ""}
-                >
+                {page > 1 ? (
+                  <Link href={`/blog?page=${page - 1}`}>
+                    <Button variant="outline" className="gap-2">
+                      <ChevronLeft className="h-4 w-4" />
+                      <span className="hidden sm:inline">Prethodna</span>
+                    </Button>
+                  </Link>
+                ) : (
                   <Button 
                     variant="outline" 
-                    className={`gap-2 ${page === 1 ? "opacity-50 cursor-not-allowed" : ""}`}
-                    disabled={page === 1}
+                    className="gap-2 opacity-50 cursor-not-allowed"
+                    disabled
                   >
                     <ChevronLeft className="h-4 w-4" />
                     <span className="hidden sm:inline">Prethodna</span>
                   </Button>
-                </Link>
+                )}
 
                 <div className="flex items-center gap-1 flex-wrap justify-center">
                   {Array.from({ length: totalPages }, (_, i) => i + 1).map((pageNum) => (
@@ -169,19 +173,23 @@ export default async function BlogPage({
                   ))}
                 </div>
 
-                <Link 
-                  href={page < totalPages ? `/blog?page=${page + 1}` : "#"}
-                  className={page === totalPages ? "pointer-events-none" : ""}
-                >
+                {page < totalPages ? (
+                  <Link href={`/blog?page=${page + 1}`}>
+                    <Button variant="outline" className="gap-2">
+                      <span className="hidden sm:inline">Sljedeća</span>
+                      <ChevronRight className="h-4 w-4" />
+                    </Button>
+                  </Link>
+                ) : (
                   <Button 
                     variant="outline" 
-                    className={`gap-2 ${page === totalPages ? "opacity-50 cursor-not-allowed" : ""}`}
-                    disabled={page === totalPages}
+                    className="gap-2 opacity-50 cursor-not-allowed"
+                    disabled
                   >
                     <span className="hidden sm:inline">Sljedeća</span>
                     <ChevronRight className="h-4 w-4" />
                   </Button>
-                </Link>
+                )}
               </div>
 
               <p className="text-sm text-gray-500">

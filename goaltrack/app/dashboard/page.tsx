@@ -20,6 +20,7 @@ export default function DashboardPage() {
   const [todayLogs, setTodayLogs] = useState<HabitLog[]>([])
   const [loading, setLoading] = useState(true)
   const [togglingHabit, setTogglingHabit] = useState<string | null>(null)
+  const [showUserMenu, setShowUserMenu] = useState(false)
 
   const supabase = createClient()
   const today = new Date().toISOString().split('T')[0]
@@ -198,19 +199,8 @@ export default function DashboardPage() {
         </div>
       </aside>
 
-      {/* Mobile header */}
-      <header className="sticky top-0 z-30 flex h-16 items-center justify-between border-b bg-white px-4 lg:hidden">
-        <Link href="/" className="flex items-center gap-2">
-          <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-gradient-to-br from-blue-600 to-purple-600">
-            <span className="text-base font-bold text-white">GT</span>
-          </div>
-          <span className="text-lg font-bold">GoalTrack</span>
-        </Link>
-        <LogoutButton />
-      </header>
-
       {/* Main content */}
-      <main className="lg:ml-64">
+      <main className="lg:ml-64 pb-20 lg:pb-0">
         <div className="mx-auto max-w-6xl px-4 py-8">
           {/* Welcome */}
           <div className="mb-8">
@@ -415,6 +405,32 @@ export default function DashboardPage() {
                 <BarChart3 className="h-5 w-5" />
                 <span className="text-xs">Napredak</span>
               </Link>
+              <div className="relative">
+                <button 
+                  onClick={() => setShowUserMenu(!showUserMenu)}
+                  className="flex flex-col items-center gap-1 px-4 py-2 text-gray-400"
+                >
+                  <User className="h-5 w-5" />
+                  <span className="text-xs">Profil</span>
+                </button>
+                {showUserMenu && (
+                  <>
+                    <div 
+                      className="fixed inset-0 z-30" 
+                      onClick={() => setShowUserMenu(false)}
+                    />
+                    <div className="absolute bottom-full right-0 mb-2 w-48 rounded-lg border bg-white shadow-lg z-40">
+                      <div className="p-3 border-b">
+                        <p className="text-sm font-medium truncate">{userName}</p>
+                        <p className="text-xs text-gray-500 truncate">{user?.email}</p>
+                      </div>
+                      <div className="p-2">
+                        <LogoutButton />
+                      </div>
+                    </div>
+                  </>
+                )}
+              </div>
             </div>
           </nav>
         </div>
