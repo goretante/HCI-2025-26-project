@@ -302,20 +302,20 @@ Simple and clear authentication forms with password reset functionality, ensurin
 Performance testing was conducted using **Google PageSpeed Insights** to ensure optimal user experience.
 
 ### Mobile Result
-- **Performance Score:** [Your mobile score]
+- **Performance Score:** 98
 - Optimized images and lazy loading
 - Efficient CSS and JavaScript
 - Fast Time to Interactive (TTI)
 
-[Insert Mobile Screenshot]
+![Mobile PageSpeed](mobile_pagespeed.png)
 
 ### Desktop Result
-- **Performance Score:** [Your desktop score]
+- **Performance Score:** 100
 - Server-side rendering for faster initial load
 - Optimized fonts and assets
 - Minimal layout shifts
 
-[Insert Desktop Screenshot]
+![Desktop PageSpeed](desktop_pagespeed.png)
 
 
 ## 13. Conclusion
