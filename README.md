@@ -9,7 +9,6 @@
 
 - **`/`**: The source code of the project
 - **`/assignments`**: Results of assignments
-- **`/docs`**: Documentation
 
 ## Project Links
 
